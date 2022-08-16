@@ -1,97 +1,57 @@
-import { useEffect, useState } from 'react'
-import { useSpring, useTransition, animated, config } from '@react-spring/web'
+import {useEffect, useState} from 'react'
+import {animated, useTransition} from '@react-spring/web'
 import './App.css'
-import { ArtworkData, data } from './data'
+import {data} from './data'
+
+type ArtworkData = {
+  id: number
+  color: string
+  left: number
+}
 
 function App() {
   const [rows, set] = useState(data)
+
   useEffect(() => {
+    let i = 0
     const t = setInterval(() => {
-      const dataCopy = [...data]
-      dataCopy.sort(() => Math.random() - 0.5)
-      set(dataCopy)
-    }, 2000)
+      const dataView = [...data].splice(i, 10)
+      if (i >= data.length - 1) {
+        i = 0
+      } else {
+        i += 1
+      }
+      set(dataView.reverse())
+    }, 1000)
     return () => clearInterval(t)
   }, [])
 
-  const artworkWidth = 100;
+  const artworkWidth = 120;
   const artworkData = rows.map((el, idx) => ({
     color: el.color,
-    x: artworkWidth * idx
+    left: artworkWidth * idx,
+    id: el.id
   }))
 
   const transitions = useTransition(
     artworkData,
     {
       key: (item: ArtworkData) => item.id,
-      from: { opacity: 0 },
-      leave: { opacity: 0 },
-      enter: ({ x }) => ({ x, opacity: 1 }),
-      update: ({ x }) => ({ x })
+      from: {opacity: 0},
+      leave: ({left}) => ({opacity: 0, left: left + (artworkWidth)}),
+      enter: {opacity: 1},
+      update: ({left}) => ({left})
     }
-
   )
 
   return (
     <div className='animatedWrapper'>
-      {transitions((style, item, t, index) => (
-        <animated.div className='squareDiv' style={{ backgroundColor: item.color }}>
+      {transitions(({opacity, left, bottom}, item) => (
+        <animated.div className='squareDiv' style={{left, opacity, backgroundColor: item.color,}}>
+          {item.id}
         </animated.div>
       ))}
-    </div>
-  )
+    </div>)
 }
 
 export default App
-
-interface ArtworkProps {
-  color: string
-}
-
-function Artwork(props: ArtworkProps) {
-  return (
-    <div className='squareDiv' style={{ backgroundColor: props.color }} />
-  )
-
-}
-
-function Text() {
-  const [flip, set] = useState(false)
-
-  useEffect(() => {
-
-  },
-    [])
-
-  const props = useSpring({
-    to: { opacity: 1 },
-    from: { opacity: 0 },
-    reset: true,
-    reverse: flip,
-    delay: 200,
-    config: config.molasses,
-    onRest: () => set(!flip)
-  })
-
-  return <animated.h1 style={props}>Hello</animated.h1>
-}
-
-function MovingDiv() {
-
-  const styles = useSpring({
-    from: { x: 0 },
-    to: { x: 2560 },
-    delay: 800
-  })
-
-  return (
-    <animated.div
-      style={{
-        width: 100,
-        height: 100,
-        backgroundColor: '#FF7C7C',
-        borderRadius: '8px',
-        ...styles
-      }} />
-  )
-}
