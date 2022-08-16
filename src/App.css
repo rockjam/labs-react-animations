@@ -1,0 +1,21 @@
+#root {
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  border:  1px solid red;
+}
+
+.animatedWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+
+}
+
+.squareDiv {
+  height: 100px;
+  width: 100px;
+  border-radius: 8px;
+  margin: 10px;
+}
